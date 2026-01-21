@@ -1,1 +1,3 @@
-export const DB_NAME = "jewelley"
+module.exports = {
+  DB_NAME: "jewelley"
+};
