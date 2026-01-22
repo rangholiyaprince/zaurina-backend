@@ -120,9 +120,24 @@ const resetPassword = async (token, newPassword) => {
   return true;
 };
 
+const updateProfileImage = async (userId, imageUrl) => {
+  const user = await User.findByIdAndUpdate(
+    userId,
+    { profile_image: imageUrl },
+    { new: true }
+  ).select('-password');
+
+  if (!user) {
+    throw { statusCode: 404, message: "User not found" };
+  }
+
+  return user;
+};
+
 module.exports = {
   registerUser,
   loginUser,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  updateProfileImage
 };

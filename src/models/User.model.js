@@ -58,6 +58,10 @@ const userSchema = new mongoose.Schema({
   reset_password_expires: {
     type: Date,
     default: null
+  },
+  profile_image: {
+    type: String,
+    default: null
   }
 }, { timestamps: true });
 

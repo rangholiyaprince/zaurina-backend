@@ -14,17 +14,27 @@ const register = async (req, res, next) => {
 };
 
 const login = async (req, res, next) => {
-  try {
-    const { email, password } = req.body;
-    const { user, token } = await authService.loginUser(email, password);
-    res.status(200).json({
-      success: true,
-      message: "Login successful",
-      data: { ...user, token }
-    });
-  } catch (error) {
-    next(error);
-  }
+  // try {
+  const { email, password } = req.body;
+  const { user, token } = await authService.loginUser(email, password);
+
+  // 🔐 SET COOKIE HERE
+  res.cookie("access_token", token, {
+    httpOnly: true,                       // JS cannot access
+    secure: process.env.NODE_ENV === "production", // HTTPS only in prod
+    sameSite: "strict",                   // CSRF protection
+    maxAge: 24 * 60 * 60 * 1000,           // 1 day
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Login successful",
+    data: { ...user, token }
+  });
+  // } catch (error) {
+  //   console.log(error);
+  //   next(error);
+  // }
 };
 
 const forgotPassword = async (req, res, next) => {
@@ -91,8 +101,48 @@ const googleAuthCallback = async (req, res, next) => {
     const token = generateToken(tokenPayload);
 
     // Redirect to frontend with token
-    // In a real app, you might use a more secure way to pass the token
-    res.redirect(`http://localhost:3000/auth/success?token=${token}`);
+    // res.redirect(`http://localhost:3000/auth/success?token=${token}`);
+
+    // For testing/Postman visibility or if client handles popup flow:
+    res.status(200).json({
+      success: true,
+      message: "Google login successful",
+      data: {
+        token,
+        user: {
+          _id: user._id,
+          email: user.email,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          googleId: user.googleId
+        }
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const uploadProfileImage = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Image file is required"
+      });
+    }
+
+    // req.file.path contains the Cloudinary URL
+    const user = await authService.updateProfileImage(req.user._id, req.file.path);
+
+    res.status(200).json({
+      success: true,
+      message: "Profile image uploaded successfully",
+      data: {
+        imageUrl: user.profile_image,
+        user: user
+      }
+    });
   } catch (error) {
     next(error);
   }
@@ -105,5 +155,6 @@ module.exports = {
   forgotPassword,
   resetPassword,
   getProfile,
-  googleAuthCallback
+  googleAuthCallback,
+  uploadProfileImage
 };
