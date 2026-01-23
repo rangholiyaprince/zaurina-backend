@@ -2,6 +2,7 @@ const authService = require('../services/auth.service');
 
 const register = async (req, res, next) => {
   try {
+    console.log(`[Auth Controller] Register request for email: ${req.body.email}`);
     const { user, token } = await authService.registerUser(req.body);
     res.status(201).json({
       success: true,
@@ -9,12 +10,14 @@ const register = async (req, res, next) => {
       data: { ...user, token }
     });
   } catch (error) {
+    console.error(`[Auth Controller] Register error: ${error.message}`);
     next(error);
   }
 };
 
 const login = async (req, res, next) => {
   // try {
+  console.log(`[Auth Controller] Login request for email: ${req.body.email}`);
   const { email, password } = req.body;
   const { user, token } = await authService.loginUser(email, password);
 
@@ -26,6 +29,7 @@ const login = async (req, res, next) => {
     maxAge: 24 * 60 * 60 * 1000,           // 1 day
   });
 
+  console.log(`[Auth Controller] Login successful for user: ${user._id}`);
   res.status(200).json({
     success: true,
     message: "Login successful",
@@ -39,6 +43,7 @@ const login = async (req, res, next) => {
 
 const forgotPassword = async (req, res, next) => {
   try {
+    console.log(`[Auth Controller] Forgot password request for email: ${req.body.email}`);
     const { email } = req.body;
     await authService.forgotPassword(email);
     res.status(200).json({
@@ -46,12 +51,14 @@ const forgotPassword = async (req, res, next) => {
       message: "Email sent successfully"
     });
   } catch (error) {
+    console.error(`[Auth Controller] Forgot password error: ${error.message}`);
     next(error);
   }
 };
 
 const resetPassword = async (req, res, next) => {
   try {
+    console.log(`[Auth Controller] Reset password request`);
     const { token, newPassword } = req.body;
     await authService.resetPassword(token, newPassword);
     res.status(200).json({
@@ -59,12 +66,14 @@ const resetPassword = async (req, res, next) => {
       message: "Password reset successfully"
     });
   } catch (error) {
+    console.error(`[Auth Controller] Reset password error: ${error.message}`);
     next(error);
   }
 };
 
 const logout = async (req, res, next) => {
   try {
+    console.log(`[Auth Controller] Logout request`);
     // Since we are using stateless JWT, the server doesn't need to do much.
     // Ideally, you might blacklist the token here if using Redis/DB blacklist.
     // For now, we just verify the user is essentially logging out.
@@ -74,17 +83,20 @@ const logout = async (req, res, next) => {
       message: "Logged out successfully"
     });
   } catch (error) {
+    console.error(`[Auth Controller] Logout error: ${error.message}`);
     next(error);
   }
 };
 
 const getProfile = async (req, res, next) => {
   try {
+    console.log(`[Auth Controller] Get profile request for user: ${req.user._id}`);
     res.status(200).json({
       success: true,
       data: req.user
     });
   } catch (error) {
+    console.error(`[Auth Controller] Get profile error: ${error.message}`);
     next(error);
   }
 };
@@ -93,6 +105,7 @@ const { generateToken } = require('../utils/token');
 
 const googleAuthCallback = async (req, res, next) => {
   try {
+    console.log(`[Auth Controller] Google auth callback`);
     const user = req.user;
     const tokenPayload = {
       user_id: user._id,
@@ -119,31 +132,25 @@ const googleAuthCallback = async (req, res, next) => {
       }
     });
   } catch (error) {
+    console.error(`[Auth Controller] Google auth callback error: ${error.message}`);
     next(error);
   }
 };
 
-const uploadProfileImage = async (req, res, next) => {
+const updateProfile = async (req, res, next) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: "Image file is required"
-      });
-    }
+    console.log(`[Auth Controller] Update profile request for user: ${req.user._id}`);
+    const user = await authService.updateUserDetails(req.user._id, req.body);
 
-    // req.file.path contains the Cloudinary URL
-    const user = await authService.updateProfileImage(req.user._id, req.file.path);
-
+    console.log(`[Auth Controller] Profile updated successfully for user: ${user._id}`);
     res.status(200).json({
       success: true,
-      message: "Profile image uploaded successfully",
-      data: {
-        imageUrl: user.profile_image,
-        user: user
-      }
+      message: "Profile updated successfully",
+      data: user
     });
   } catch (error) {
+    console.log(error);
+    console.error(`[Auth Controller] Update profile error: ${error.message}`);
     next(error);
   }
 };
@@ -156,5 +163,5 @@ module.exports = {
   resetPassword,
   getProfile,
   googleAuthCallback,
-  uploadProfileImage
+  updateProfile
 };

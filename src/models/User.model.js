@@ -20,6 +20,16 @@ const userSchema = new mongoose.Schema({
     lowercase: true,
     index: true
   },
+  phone_code: {
+    type: String,
+    default: null,
+    trim: true
+  },
+  phone_number: {
+    type: String,
+    default: null,
+    trim: true
+  },
 
   password: {
     type: String,

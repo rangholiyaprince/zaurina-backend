@@ -120,11 +120,38 @@ const resetPassword = async (token, newPassword) => {
   return true;
 };
 
-const updateProfileImage = async (userId, imageUrl) => {
+const updateUserDetails = async (userId, updateData) => {
+  // Fields that should NOT be updated via this endpoint
+  const restrictedFields = [
+    'password',
+    'user_type',
+    'is_verified',
+    'provider',
+    'googleId',
+    'reset_password_token',
+    'reset_password_expires',
+    'last_login_at',
+    '_id',
+    'createdAt',
+    'updatedAt'
+  ];
+
+  const dataToUpdate = {};
+
+  Object.keys(updateData).forEach(key => {
+    if (!restrictedFields.includes(key)) {
+      dataToUpdate[key] = updateData[key];
+    }
+  });
+
+  if (Object.keys(dataToUpdate).length === 0) {
+    throw { statusCode: 400, message: "No valid fields to update" };
+  }
+
   const user = await User.findByIdAndUpdate(
     userId,
-    { profile_image: imageUrl },
-    { new: true }
+    { $set: dataToUpdate },
+    { new: true, runValidators: true }
   ).select('-password');
 
   if (!user) {
@@ -139,5 +166,5 @@ module.exports = {
   loginUser,
   forgotPassword,
   resetPassword,
-  updateProfileImage
+  updateUserDetails
 };
