@@ -18,6 +18,41 @@ const createAddress = async (userId, addressData) => {
   return address;
 };
 
+const updateAddress = async (userId, addressId, addressData) => {
+  // Check if address belongs to user
+  const address = await Address.findOne({ _id: addressId, user_id: userId });
+
+  if (!address) {
+    throw new Error('Address not found or unauthorized');
+  }
+
+  // If this address is set as default, unset other default addresses for this user
+  if (addressData.isDefault) {
+    await Address.updateMany(
+      { user_id: userId, isDefault: true },
+      { isDefault: false }
+    );
+  }
+
+  const updatedAddress = await Address.findByIdAndUpdate(
+    addressId,
+    addressData,
+    { new: true, runValidators: true }
+  );
+
+  return updatedAddress;
+};
+
+const deleteAddress = async (userId, addressId) => {
+  const address = await Address.findOneAndDelete({ _id: addressId, user_id: userId });
+
+  if (!address) {
+    throw new Error('Address not found or unauthorized');
+  }
+
+  return address;
+};
+
 const getUserAddresses = async (userId) => {
   const addresses = await Address.find({ user_id: userId }).sort({ isDefault: -1, createdAt: -1 });
   return addresses;
@@ -25,5 +60,7 @@ const getUserAddresses = async (userId) => {
 
 module.exports = {
   createAddress,
-  getUserAddresses
+  getUserAddresses,
+  updateAddress,
+  deleteAddress
 };

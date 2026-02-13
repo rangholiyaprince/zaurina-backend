@@ -1,13 +1,9 @@
 const cloudinary = require("cloudinary").v2;
 
-if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
-  console.error("❌ Cloudinary config missing! Please add CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET to your .env file.");
-}
-
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloud_name: "dhsce5vxh",
+  api_key: "248215275419625",
+  api_secret: "lYxWKRjw1LWrY40hE4fuaxau9t0",
 });
 
 module.exports = cloudinary;

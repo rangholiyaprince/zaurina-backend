@@ -1,0 +1,5 @@
+﻿0a4457d Fix: Remove hardcoded Stripe key and consolidate commits
+0d0a437 feat: Add initial Stripe configuration and client initialization.
+3c09a14 fix bug
+cbf9b2b feat: Implement core user authentication, authorization, and address management functionalities.
+0eec2d3 fix this issue

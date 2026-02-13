@@ -23,7 +23,7 @@ const login = async (req, res, next) => {
 
   // 🔐 SET COOKIE HERE
   res.cookie("access_token", token, {
-    httpOnly: true,                       // JS cannot access
+    httpOnly: false,                       // JS cannot access
     secure: process.env.NODE_ENV === "production", // HTTPS only in prod
     sameSite: "strict",                   // CSRF protection
     maxAge: 24 * 60 * 60 * 1000,           // 1 day
